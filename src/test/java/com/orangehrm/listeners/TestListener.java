@@ -11,8 +11,8 @@ import org.testng.ITestResult;
 
 public class TestListener implements ITestListener {
 
-    private ExtentReports extentReports;
-    private ExtentTest extentTest;
+    private static final ThreadLocal<ExtentTest> extentTest = new ThreadLocal<>();
+    private static ExtentReports extentReports;
 
     @Override
     public void onStart(ITestContext context) {
@@ -23,48 +23,60 @@ public class TestListener implements ITestListener {
     @Override
     public void onTestStart(ITestResult result) {
 
-        extentTest = extentReports.createTest(result.getName());
+        String testName = result.getMethod().getMethodName();
+
+        ExtentTest test = extentReports.createTest(testName);
+
+        extentTest.set(test);
+
+        extentTest.get().info("Test started on thread: " + Thread.currentThread().getId());
     }
 
     @Override
     public void onTestSuccess(ITestResult result) {
 
-        extentTest.pass("Test Passed");
+        extentTest.get().pass("Test Passed");
     }
 
     @Override
     public void onTestFailure(ITestResult result) {
 
-        extentTest.fail(result.getThrowable());
+        extentTest.get().fail(result.getThrowable());
 
-        BaseTest baseTest =
-                (BaseTest) result.getInstance();
+        Object testClass = result.getInstance();
 
-        String screenshotPath =
-                ScreenshotUtils.captureScreenshot(
-                        baseTest.getDriver(),
-                        result.getName()
-                );
+        if (testClass instanceof BaseTest baseTest) {
 
-        try {
+            if (baseTest.getDriver() != null) {
 
-            extentTest.addScreenCaptureFromPath(screenshotPath);
+                String screenshotPath = ScreenshotUtils.captureScreenshot(baseTest.getDriver(), result.getName());
 
-        } catch (Exception e) {
+                try {
 
-            e.printStackTrace();
+                    extentTest.get().addScreenCaptureFromPath(screenshotPath);
+
+                } catch (Exception e) {
+
+                    extentTest.get().warning("Unable to attach screenshot: " + e.getMessage());
+                }
+            }
         }
     }
 
     @Override
     public void onTestSkipped(ITestResult result) {
 
-        extentTest.skip("Test Skipped");
+        extentTest.get().skip("Test Skipped");
     }
 
     @Override
     public void onFinish(ITestContext context) {
 
-        extentReports.flush();
+        if (extentReports != null) {
+
+            extentReports.flush();
+        }
+
+        extentTest.remove();
     }
 }

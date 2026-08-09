@@ -7,55 +7,44 @@ import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.WebDriver;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
-
-import java.time.Duration;
+import org.testng.annotations.Optional;
+import org.testng.annotations.Parameters;
 
 public class BaseTest {
 
-    protected WebDriver driver;
+    private static final Logger logger = LogManager.getLogger(BaseTest.class);
 
-    // Logger
-    private static final Logger logger =
-            LogManager.getLogger(BaseTest.class);
+    @Parameters("browser")
+    @BeforeMethod(alwaysRun = true)
+    public void setUp(@Optional("") String browser) {
 
-    @BeforeMethod
-    public void setUp() {
+        if (browser == null || browser.isBlank()) {
+            browser = ConfigReader.getProperty("browser");
+        }
 
-        ConfigReader.loadProperties();
+        logger.info("Starting browser: {} on thread: {}", browser, Thread.currentThread().getId());
 
-        String browser = ConfigReader.getProperty("browser");
+        DriverFactory.createDriver(browser);
 
-        logger.info("Starting browser: {}", browser);
+        if (!Boolean.parseBoolean(ConfigReader.getProperty("headless"))) {
 
-        driver = DriverFactory.getDriver(browser);
+            getDriver().manage().window().maximize();
+        }
 
-        driver.manage().window().maximize();
-
-        driver.manage().timeouts().implicitlyWait(
-                Duration.ofSeconds(
-                        Long.parseLong(
-                                ConfigReader.getProperty("implicitWait")
-                        )
-                )
-        );
-
-        driver.get(ConfigReader.getProperty("url"));
+        getDriver().get(ConfigReader.getProperty("url"));
 
         logger.info("Application opened successfully");
     }
 
-    @AfterMethod
+    @AfterMethod(alwaysRun = true)
     public void tearDown() {
 
-        if (driver != null) {
+        logger.info("Closing browser on thread: {}", Thread.currentThread().getId());
 
-            logger.info("Closing browser");
-
-            driver.quit();
-        }
+        DriverFactory.quitDriver();
     }
 
     public WebDriver getDriver() {
-        return driver;
+        return DriverFactory.getDriver();
     }
 }

@@ -1,30 +1,42 @@
-
 package com.orangehrm.utilities;
 
-import java.io.FileInputStream;
+import com.orangehrm.constants.FrameworkConstants;
+
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
-public class ConfigReader {
+public final class ConfigReader {
 
-    private static Properties properties;
+    private static final Properties properties = new Properties();
 
-    public static void loadProperties() {
+    static {
 
-        properties = new Properties();
+        try (InputStream inputStream = ConfigReader.class.getClassLoader().getResourceAsStream(FrameworkConstants.CONFIG_FILE)) {
 
-        try {
-            FileInputStream file =
-                    new FileInputStream("src/main/resources/config.properties");
-            properties.load(file);
-            file.close();
+            if (inputStream == null) {
+                throw new RuntimeException("Config file not found: " + FrameworkConstants.CONFIG_FILE);
+            }
+
+            properties.load(inputStream);
+
         } catch (IOException e) {
-            e.printStackTrace();
+
+            throw new RuntimeException("Unable to load config.properties", e);
         }
     }
 
-    public static String getProperty(String key) {
-        return properties.getProperty(key);
+    private ConfigReader() {
     }
 
+    public static String getProperty(String key) {
+
+        String value = properties.getProperty(key);
+
+        if (value == null) {
+            throw new IllegalArgumentException("Property not found: " + key);
+        }
+
+        return value.trim();
+    }
 }
