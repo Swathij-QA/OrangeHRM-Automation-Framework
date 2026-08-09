@@ -1,39 +1,90 @@
-target/
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
-.kotlin
+##############################################
+# Maven
+##############################################
 
-### IntelliJ IDEA ###
-.idea/modules.xml
-.idea/jarRepositories.xml
-.idea/compiler.xml
-.idea/libraries/
-*.iws
+target/
+
+##############################################
+# IntelliJ IDEA
+##############################################
+
+.idea/
 *.iml
 *.ipr
+*.iws
 
-### Eclipse ###
-.apt_generated
+##############################################
+# Eclipse
+##############################################
+
 .classpath
-.factorypath
 .project
-.settings
-.springBeans
-.sts4-cache
+.settings/
+.factorypath
+.apt_generated
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
+##############################################
+# VS Code
+##############################################
 
-### VS Code ###
 .vscode/
 
-### Mac OS ###
+##############################################
+# NetBeans
+##############################################
+
+/nbproject/
+/nbbuild/
+/dist/
+/build/
+
+##############################################
+# Operating System Files
+##############################################
+
 .DS_Store
+Thumbs.db
+Desktop.ini
+
+##############################################
+# Selenium Framework Generated Files
+##############################################
+
+logs/
+reports/
+screenshots/
+test-output/
+
+##############################################
+# Log Files
+##############################################
+
+*.log
+
+##############################################
+# Extent Reports
+##############################################
+
+*.html
+
+##############################################
+# Temporary Files
+##############################################
+
+*.tmp
+*.temp
+*.bak
+
+##############################################
+# Java Crash Logs
+##############################################
+
+hs_err_pid*
+replay_pid*
+
+##############################################
+# Environment Files
+##############################################
+
+.env
+.env.*
